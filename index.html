@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>کارزار v-2</title>
+    <title>کارزار v-2 | جستجوگر هوشمند</title>
     <style>
         :root {
             --bg-color: #ffffff;
             --text-color: #202124;
             --search-bg: #ffffff;
             --search-border: #dfe1e5;
-            --search-shadow: 0 1px 6px rgba(32,33,36,0.28);
-            --card-hover: #f8f9fa;
-            --link-color: #1a0dab;
+            --search-shadow: 0 1px 6px rgba(32,33,36,0.18);
+            --accent-color: #4285f4;
             --snippet-color: #4d5156;
+            --card-bg: #ffffff;
         }
 
         [data-theme="dark"] {
@@ -21,10 +21,10 @@
             --text-color: #e8eaed;
             --search-bg: #303134;
             --search-border: #5f6368;
-            --search-shadow: 0 1px 6px rgba(0,0,0,0.5);
-            --card-hover: #3c4043;
-            --link-color: #8ab4f8;
+            --search-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            --accent-color: #8ab4f8;
             --snippet-color: #bdc1c6;
+            --card-bg: #2d2e31;
         }
 
         body {
@@ -32,48 +32,62 @@
             padding: 0;
             background-color: var(--bg-color);
             color: var(--text-color);
-            font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
-            transition: background 0.3s ease;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            transition: all 0.3s ease;
+            min-height: 100vh;
         }
 
-        /* دکمه تغییر تم */
+        /* دکمه تم جذاب‌تر */
         .theme-toggle {
-            position: absolute;
+            position: fixed;
             top: 20px;
             left: 20px;
             cursor: pointer;
-            padding: 8px 15px;
-            border-radius: 20px;
+            padding: 10px 20px;
+            border-radius: 30px;
             border: 1px solid var(--search-border);
             background: var(--search-bg);
             color: var(--text-color);
-            font-size: 14px;
+            font-weight: bold;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        .header {
+        .container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-top: 100px;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            padding-top: 15vh;
         }
 
-        /* لوگوی رنگی کارزار */
+        .container.active {
+            padding-top: 30px;
+        }
+
         .logo {
-            font-size: 60px;
-            font-weight: bold;
+            font-size: 70px;
+            font-weight: 900;
             margin-bottom: 30px;
-            letter-spacing: -2px;
+            user-select: none;
+            transition: font-size 0.4s;
         }
-        .logo span:nth-child(1) { color: #4285F4; } /* ک - آبی */
-        .logo span:nth-child(2) { color: #EA4335; } /* ا - قرمز */
-        .logo span:nth-child(3) { color: #FBBC05; } /* ر - زرد */
-        .logo span:nth-child(4) { color: #4285F4; } /* ز - آبی */
-        .logo span:nth-child(5) { color: #34A853; } /* ا - سبز */
-        .logo span:nth-child(6) { color: #EA4335; } /* ر - قرمز */
 
-        .search-container {
-            width: 100%;
-            max-width: 584px;
+        .container.active .logo {
+            font-size: 35px;
+            margin-bottom: 20px;
+        }
+
+        .logo span:nth-child(1) { color: #4285F4; }
+        .logo span:nth-child(2) { color: #EA4335; }
+        .logo span:nth-child(3) { color: #FBBC05; }
+        .logo span:nth-child(4) { color: #4285F4; }
+        .logo span:nth-child(5) { color: #34A853; }
+        .logo span:nth-child(6) { color: #EA4335; }
+
+        .search-area {
+            width: 90%;
+            max-width: 600px;
             position: relative;
         }
 
@@ -82,9 +96,9 @@
             align-items: center;
             background: var(--search-bg);
             border: 1px solid var(--search-border);
-            border-radius: 24px;
-            padding: 5px 15px;
-            transition: box-shadow 0.2s;
+            border-radius: 28px;
+            padding: 8px 20px;
+            transition: all 0.3s;
         }
 
         .search-box:hover, .search-box:focus-within {
@@ -97,147 +111,183 @@
             border: none;
             background: transparent;
             color: var(--text-color);
-            padding: 10px;
-            font-size: 16px;
+            padding: 12px;
+            font-size: 18px;
             outline: none;
+            text-align: right;
         }
 
-        .results-container {
+        /* بخش نتایج */
+        #results {
+            width: 100%;
             max-width: 700px;
-            margin: 40px auto;
-            padding: 0 20px;
+            margin: 30px auto;
+            padding: 0 15px;
         }
 
-        .result-item {
-            margin-bottom: 30px;
-            display: block;
+        .result-card {
+            background: var(--card-bg);
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            transition: transform 0.2s;
+            animation: fadeIn 0.5s ease forwards;
+            opacity: 0;
+            border: 1px solid transparent;
+        }
+
+        .result-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--search-border);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-card a {
             text-decoration: none;
-            padding: 10px;
-            border-radius: 8px;
-            transition: background 0.2s;
         }
 
-        .result-item:hover {
-            background: var(--card-hover);
-        }
-
-        .result-url {
-            font-size: 14px;
-            color: var(--text-color);
-            margin-bottom: 4px;
+        .result-header {
             display: flex;
             align-items: center;
             gap: 10px;
+            margin-bottom: 5px;
         }
 
-        .favicon {
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
+        .favicon { width: 18px; height: 18px; border-radius: 4px; }
+
+        .result-url {
+            font-size: 13px;
+            color: var(--text-color);
+            opacity: 0.8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .result-title {
-            font-size: 20px;
-            color: var(--link-color);
-            margin: 0 0 5px 0;
-            font-weight: normal;
-        }
-
-        .result-title:hover {
-            text-decoration: underline;
+            font-size: 19px;
+            color: var(--accent-color);
+            margin: 5px 0;
+            font-weight: 500;
         }
 
         .result-snippet {
             font-size: 14px;
             color: var(--snippet-color);
-            line-height: 1.5;
+            line-height: 1.6;
         }
 
-        #loading {
-            text-align: center;
+        .loader {
             display: none;
-            margin-top: 20px;
+            margin: 30px auto;
+            border: 3px solid var(--search-border);
+            border-radius: 50%;
+            border-top: 3px solid var(--accent-color);
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
         }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
     </style>
 </head>
 <body>
 
-    <button class="theme-toggle" onclick="toggleTheme()">تغییر حالت نمایش</button>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">حالت شب</button>
 
-    <div class="header" id="headerSection">
+    <div class="container" id="mainContainer">
         <div class="logo">
             <span>ک</span><span>ا</span><span>ر</span><span>ز</span><span>ا</span><span>ر</span>
         </div>
-        <div class="search-container">
+        
+        <div class="search-area">
             <div class="search-box">
-                <input type="text" id="searchInput" placeholder="جستجو در کارزار..." onkeypress="if(event.key === 'Enter') search()">
+                <input type="text" id="searchInput" placeholder="عبارت خود را جستجو کنید..." autocomplete="off">
             </div>
         </div>
-    </div>
 
-    <div class="results-container">
-        <div id="loading">در حال جستجو...</div>
+        <div class="loader" id="loader"></div>
         <div id="results"></div>
     </div>
 
     <script>
+        const searchInput = document.getElementById('searchInput');
+        const resultsDiv = document.getElementById('results');
+        const loader = document.getElementById('loader');
+        const container = document.getElementById('mainContainer');
+
         // مدیریت تم
         function toggleTheme() {
-            const body = document.body;
-            const currentTheme = body.getAttribute('data-theme');
-            if (currentTheme === 'dark') {
-                body.removeAttribute('data-theme');
+            const isDark = document.body.hasAttribute('data-theme');
+            if (isDark) {
+                document.body.removeAttribute('data-theme');
+                document.getElementById('themeBtn').innerText = 'حالت شب';
             } else {
-                body.setAttribute('data-theme', 'dark');
+                document.body.setAttribute('data-theme', 'dark');
+                document.getElementById('themeBtn').innerText = 'حالت روز';
             }
         }
 
-        async function search() {
-            const query = document.getElementById('searchInput').value;
-            const resultsDiv = document.getElementById('results');
-            const loading = document.getElementById('loading');
-            const header = document.getElementById('headerSection');
-
+        // تابع اصلی جستجو
+        async function performSearch() {
+            const query = searchInput.value.trim();
             if (!query) return;
 
-            // کوچک کردن هدر بعد از اولین جستجو (شبیه گوگل)
-            header.style.marginTop = '20px';
-            
-            loading.style.display = 'block';
+            // تغییر حالت صفحه
+            container.classList.add('active');
             resultsDiv.innerHTML = '';
+            loader.style.display = 'block';
 
             try {
+                // آدرس ورکر شما
                 const workerUrl = `https://karzar.professor-ghiasvand.workers.dev/?q=${encodeURIComponent(query)}`;
+                
                 const response = await fetch(workerUrl);
                 const data = await response.json();
+                
+                loader.style.display = 'none';
 
-                loading.style.display = 'none';
+                // بررسی داده‌های دریافتی (انعطاف پذیر برای انواع فرمت‌ها)
+                const finalResults = data.results || (Array.isArray(data) ? data : []);
 
-                if (data.results && data.results.length > 0) {
-                    data.results.forEach(result => {
-                        const domain = new URL(result.url).hostname;
-                        const faviconUrl = `https://www.google.com/s2/favicons?sz=64&domain=${domain}`;
-
-                        const item = `
-                            <a href="${result.url}" target="_blank" class="result-item">
-                                <div class="result-url">
-                                    <img src="${faviconUrl}" class="favicon">
-                                    <span>${result.url}</span>
-                                </div>
-                                <h3 class="result-title">${result.title}</h3>
-                                <p class="result-snippet">${result.description}</p>
-                            </a>
+                if (finalResults.length > 0) {
+                    finalResults.forEach((res, index) => {
+                        const domain = new URL(res.url).hostname;
+                        const card = `
+                            <div class="result-card" style="animation-delay: ${index * 0.05}s">
+                                <a href="${res.url}" target="_blank">
+                                    <div class="result-header">
+                                        <img src="https://www.google.com/s2/favicons?sz=64&domain=${domain}" class="favicon" onerror="this.src='https://www.google.com/favicon.ico'">
+                                        <span class="result-url">${res.url}</span>
+                                    </div>
+                                    <div class="result-title">${res.title}</div>
+                                    <div class="result-snippet">${res.description || res.snippet || 'توضیحاتی برای این سایت در دسترس نیست.'}</div>
+                                </a>
+                            </div>
                         `;
-                        resultsDiv.innerHTML += item;
+                        resultsDiv.innerHTML += card;
                     });
                 } else {
-                    resultsDiv.innerHTML = '<p>نتیجه‌ای یافت نشد.</p>';
+                    resultsDiv.innerHTML = '<p style="text-align:center; margin-top:50px;">متأسفانه نتیجه‌ای یافت نشد.</p>';
                 }
-            } catch (error) {
-                loading.style.display = 'none';
-                resultsDiv.innerHTML = '<p>خطا در دریافت اطلاعات.</p>';
+
+            } catch (err) {
+                loader.style.display = 'none';
+                resultsDiv.innerHTML = '<p style="text-align:center; color:red; margin-top:50px;">خطا در برقراری ارتباط با موتور جستجو.</p>';
+                console.error(err);
             }
         }
+
+        // اجرای جستجو با Enter
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') performSearch();
+        });
     </script>
 </body>
 </html>
+
